@@ -15,7 +15,7 @@ public class BLocation {
         this.x = x;
         this.y = y;
         this.z = z;
-        this.id = ((long) x << 32) ^ ((long)z << 16) ^ y;
+        this.id = ((long)x & 0x3FFFFFFL) | (((long)z & 0x3FFFFFFL) << 26) | (((long)y & 0xFFFL) << 52);
     }
 
     public BLocation(Location location) {

@@ -5,6 +5,7 @@ import co.aikar.commands.PaperCommandManager;
 import com.google.common.reflect.ClassPath;
 import it.unimi.dsi.fastutil.objects.*;
 import mike.blueprint.config.Config;
+import mike.blueprint.config.SQLiteStorage;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
@@ -89,6 +90,9 @@ public class Loader {
         if(o instanceof Config config) {
             config.load();
             config.init();
+        }
+        if(o instanceof SQLiteStorage sqLiteStorage) {
+            sqLiteStorage.load();
         }
         loaded.put(o.getClass(), o);
     }
