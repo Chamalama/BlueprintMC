@@ -109,6 +109,7 @@ public class Text {
     }
 
     public static String smallCaps(String text) {
+        text = text.toLowerCase();
         StringBuilder builder = new StringBuilder();
         for(char c : text.toCharArray()) {
             if(regularToSmallCaps.containsKey(c)) {

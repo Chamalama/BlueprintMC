@@ -42,7 +42,7 @@ public abstract class SQLiteStorage {
     }
 
     public void createIDTable(String tableName) throws SQLException {
-        try(PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (id TEXT PRIMARY KEY AUTOINCREMENT, data BLOB NOT NULL)")) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (id TEXT PRIMARY KEY, data BLOB NOT NULL)")) {
             preparedStatement.execute();
         }
     }

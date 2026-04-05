@@ -6,6 +6,7 @@ import com.google.common.reflect.ClassPath;
 import it.unimi.dsi.fastutil.objects.*;
 import mike.blueprint.config.Config;
 import mike.blueprint.config.SQLiteStorage;
+import mike.blueprint.gui.BaseGUI;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 
@@ -89,7 +90,6 @@ public class Loader {
         }
         if(o instanceof Config config) {
             config.load();
-            config.init();
         }
         if(o instanceof SQLiteStorage sqLiteStorage) {
             sqLiteStorage.load();
@@ -97,7 +97,7 @@ public class Loader {
         loaded.put(o.getClass(), o);
     }
 
-    public static <V> V get(Class<?> clazz) {
+    public static <V> V get(Class<V> clazz) {
         return (V) loaded.get(clazz);
     }
 
