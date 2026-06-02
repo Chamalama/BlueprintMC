@@ -3,6 +3,11 @@ package mike.blueprint.util;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -28,6 +33,19 @@ public class Region {
                 max(one.getBlockY(), two.getBlockY()),
                 max(one.getBlockZ(), two.getBlockZ())
         );
+    }
+
+    public Set<Block> getRegionBlocks(World world) {
+        final Set<Block> blocks = new HashSet<>();
+        for(int x = minX; x < maxX; x++) {
+            for(int y = minY; y < maxY; y++) {
+                for(int z = minZ; z < maxZ; z++) {
+                    final Block block = world.getBlockAt(x, y, z);
+                    blocks.add(block);
+                }
+            }
+        }
+        return blocks;
     }
 
     public static int min(int one, int two) {

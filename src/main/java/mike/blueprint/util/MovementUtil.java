@@ -1,6 +1,9 @@
 package mike.blueprint.util;
 
+import mike.blueprint.pathfinder.Node;
 import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.LivingEntity;
@@ -14,20 +17,24 @@ public class MovementUtil {
         if(distance < distanceThreshold) return;
         final Vector currVector = current.toVector();
         final Vector endVector = endLocation.toVector();
-        final Vector pointToTravel = endVector.subtract(currVector).normalize().multiply(speed).setY(0);
-        final Location newLocation = entity.getLocation().add(pointToTravel);
-        final Block block = newLocation.getBlock();
-        if(block.isEmpty()) {
-            if(block.getRelative(BlockFace.DOWN).isEmpty()) {
-                entity.teleportAsync(newLocation.clone().add(0, getYDiff(newLocation, false, 16), 0));
-            } else {
-                entity.teleportAsync(newLocation);
+        final Vector pointToTravel = endVector.subtract(currVector).normalize().multiply(1.0).setY(0);
+        final Location newLocation = entity.getLocation().clone().add(pointToTravel).add(0, 0.5, 0);
+        final World world = newLocation.getWorld();
+        world.spawnParticle(Particle.FLAME, newLocation, 1, 0.0, 0.0, 0.0, 0.0);
+        Block block = newLocation.getBlock();
+        if(!block.isSolid()) {
+            entity.setVelocity(pointToTravel.multiply(speed));
+        } else {
+            if(block.getY() > current.getBlockY()) {
+                int diff = block.getY() - current.getBlockY();
+                double jumpHeight = diff * 0.5;
+                pointToTravel.setY(jumpHeight);
+            }else{
+                int diff = current.getBlockY() - block.getY();
+                double fallHeight = diff * 0.5;
+                pointToTravel.setY(fallHeight);
             }
-        }else{
-            final Block above = block.getRelative(BlockFace.UP);
-            if(above.isEmpty()) {
-                entity.teleportAsync(newLocation.clone().add(0, getYDiff(newLocation, true, 16), 0));
-            }
+            entity.setVelocity(pointToTravel.multiply(speed));
         }
     }
 

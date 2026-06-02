@@ -7,9 +7,12 @@ import org.bukkit.plugin.Plugin;
 import javax.security.auth.callback.Callback;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class Config {
 
@@ -24,20 +27,22 @@ public abstract class Config {
 
     public <V> void load() {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-            plugin.getLogger().info("Loading config... " + fileName);
-            V loaded = (V) Json.get(plugin, folderName, fileName, this.getClass());
+            final V loaded = (V) Json.get(plugin, folderName, fileName, this.getClass());
             if (loaded != null) {
+                plugin.getLogger().info("Loading config... " + fileName);
                 Class<?> clazz = this.getClass();
                 while(clazz != null && clazz != Object.class) {
                     for (Field field : clazz.getDeclaredFields()) {
                         if (Modifier.isTransient(field.getModifiers())) continue;
                         field.setAccessible(true);
                         try {
-                            field.set(this, field.get(loaded));
+                            final Object val = field.get(loaded);
+                            field.set(this, val);
                         } catch (Exception e) {
                             throw new RuntimeException(e);
                         }
                     }
+                    Json.write(plugin, folderName, fileName, this, true);
                     clazz = clazz.getSuperclass();
                 }
             } else {

@@ -2,6 +2,7 @@ package mike.blueprint.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.Getter;
 import org.bukkit.plugin.Plugin;
 
 import java.io.File;
@@ -12,6 +13,7 @@ import java.lang.reflect.Modifier;
 
 public class Json {
 
+    @Getter
     private static final Gson JSON = new GsonBuilder().setPrettyPrinting().serializeNulls().disableHtmlEscaping().excludeFieldsWithModifiers(Modifier.TRANSIENT).create();
 
     public static <V> void write(Plugin plugin, String folder, String file, V object, boolean update) {

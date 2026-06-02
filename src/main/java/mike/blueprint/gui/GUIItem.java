@@ -21,12 +21,11 @@ import java.util.List;
 @Setter
 public class GUIItem implements Serializable {
 
-    public static transient NamespacedKey ITEM_KEY;
+    public static transient NamespacedKey ITEM_KEY = new NamespacedKey(Blueprint.getInst(), "ITEM_KEY");
 
     private Material itemType = Material.PAPER;
-    private String name = "";
+    private String name = "", key = "KEY";
     private List<String> lore = new ArrayList<>();
-    private String TAG = "TAG";
     private int slot = 1;
 
     public ItemStack build() {
@@ -35,13 +34,9 @@ public class GUIItem implements Serializable {
         stack.setData(DataComponentTypes.LORE, ItemLore.lore(Text.translate(lore)));
         final ItemMeta meta = stack.getItemMeta();
         final PersistentDataContainer pdc = meta.getPersistentDataContainer();
-        pdc.set(ITEM_KEY, PersistentDataType.STRING, TAG);
+        pdc.set(ITEM_KEY, PersistentDataType.STRING, key);
         stack.setItemMeta(meta);
         return stack;
-    }
-
-    static {
-        ITEM_KEY = new NamespacedKey(Blueprint.getInst(), "ITEM_KEY");
     }
 
 }

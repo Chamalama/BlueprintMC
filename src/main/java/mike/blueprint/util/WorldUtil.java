@@ -11,6 +11,7 @@ import org.bukkit.WorldCreator;
 import javax.security.auth.callback.Callback;
 import java.io.*;
 import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.StampedLock;
@@ -50,30 +51,32 @@ public class WorldUtil {
 
     public static void fastCopy(String initialWorld, String newWorld, Consumer<World> callback) {
         final File worldDir = Bukkit.getWorldContainer();
+        final File dimensionDir = new File(worldDir, "world/dimensions/minecraft");
         Bukkit.getScheduler().runTaskAsynchronously(Blueprint.getInst(), () -> {
-            final File[] files = worldDir.listFiles();
+            final File[] files = dimensionDir.listFiles();
             if(files == null) return;
             final File copyFile = (File) Arrays.stream(files).filter(file -> file.getName().equalsIgnoreCase(initialWorld)).toArray()[0];
             if(copyFile == null || !copyFile.isDirectory()) return;
-            final File copyWorld = new File(worldDir, newWorld);
-            if(!copyWorld.exists()) {
-                copyWorld.mkdirs();
-            }
+            final File copyWorld = new File(dimensionDir, newWorld);
+            final File paperDir = new File(copyWorld, "data/paper");
+            copyWorld.mkdirs();
+            paperDir.mkdirs();
             final File[] worldFiles = copyFile.listFiles();
             if(worldFiles == null) return;
             for(File file : worldFiles) {
+                if(file.getName().equalsIgnoreCase("data")) {
+                    if(file.listFiles()[1].getName().equalsIgnoreCase("paper")) continue;
+                }
                 if(file.isDirectory()) {
                     try {
-                        final File copyDir = new File(copyWorld, file.getName());
-                        copyDir.mkdirs();
-                        FileUtils.copyDirectory(file, copyDir, false);
+                        FileUtils.copyDirectoryToDirectory(file, copyWorld);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                     continue;
                 }
                 final String name = file.getName();
-                if(name.equalsIgnoreCase("session.lock") || name.equalsIgnoreCase("uid.dat")) continue;
+                if(name.equalsIgnoreCase("paper-world.yml")) continue;
                 try {
                     FileUtils.copyFileToDirectory(file, copyWorld, false);
                 }catch (Exception e) {
@@ -88,6 +91,14 @@ public class WorldUtil {
         });
     }
 
+    private static void makeDirs(File sourceFile, File copyDir) {
+        if(!sourceFile.isDirectory()) return;
+        final File newDir = new File(copyDir, sourceFile.getName());
+        newDir.mkdirs();
+        copyDir = newDir;
+        makeDirs(sourceFile, copyDir);
+    }
+
     public static void unloadWorld(World world) {
         if(spawnLocation == null) {
             spawnLocation = new Location(Bukkit.getWorld("world"), 0, 100, 0);
@@ -98,7 +109,7 @@ public class WorldUtil {
                 boolean unloaded = Bukkit.unloadWorld(world, false);
                 if(unloaded) {
                     CompletableFuture.runAsync(() -> {
-                        final File worldDir = Bukkit.getWorldContainer();
+                        final File worldDir = new File(Bukkit.getWorldContainer(), "world/dimensions/minecraft");
                         final File[] worlds = worldDir.listFiles();
                         if(worlds == null) return;
                         final Iterator<File> dirIterator = Arrays.stream(worlds).iterator();

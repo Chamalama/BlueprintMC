@@ -69,10 +69,6 @@ public abstract class BaseGUI extends Config implements InventoryHolder, Listene
         }
     }
 
-    public void handleClick(InventoryClickEvent event, Consumer<InventoryClickEvent> callback) {
-        callback.accept(event);
-    }
-
     @Override
     public @NotNull Inventory getInventory() {
         return inventory;

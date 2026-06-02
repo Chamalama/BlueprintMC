@@ -4,6 +4,7 @@ import co.aikar.commands.BaseCommand;
 import co.aikar.commands.PaperCommandManager;
 import com.google.common.reflect.ClassPath;
 import it.unimi.dsi.fastutil.objects.*;
+import lombok.Getter;
 import mike.blueprint.config.Config;
 import mike.blueprint.config.SQLiteStorage;
 import mike.blueprint.gui.BaseGUI;
@@ -18,6 +19,7 @@ import java.util.*;
 
 public class Loader {
 
+    @Getter
     public static final Object2ObjectMap<Class<?>, Object> loaded = new Object2ObjectOpenHashMap<>();
     private static final Set<Class<?>> resolving = new HashSet<>();
 

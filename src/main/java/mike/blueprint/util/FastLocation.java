@@ -40,6 +40,10 @@ public class FastLocation implements Cloneable {
         this(location.getWorld().getName(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getYaw(), location.getPitch());
     }
 
+    public String serialize() {
+        return "world=" + worldName + ",x=" + x + ",y=" + y + ",z=" + z;
+    }
+
     public FastLocation edit(Consumer<FastLocation> fastLocationConsumer) {
         fastLocationConsumer.accept(this);
         return this;

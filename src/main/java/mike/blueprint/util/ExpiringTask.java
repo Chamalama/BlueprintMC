@@ -13,7 +13,7 @@ public class ExpiringTask implements Consumer<BukkitTask> {
     private final Plugin plugin;
     private boolean async;
     private int runCount, currentRuns;
-    private Runnable action;
+    private Runnable action, completeAction;
 
     public ExpiringTask(Plugin plugin) {
         this.plugin = plugin;
@@ -50,6 +50,11 @@ public class ExpiringTask implements Consumer<BukkitTask> {
         return this;
     }
 
+    public ExpiringTask onComplete(Runnable action) {
+        this.completeAction = action;
+        return this;
+    }
+
     /**
      * Runs the action on this task
      * @param delay ticks before first run
@@ -71,6 +76,9 @@ public class ExpiringTask implements Consumer<BukkitTask> {
         }
         action.run();
         if(runCount > 0 && ++currentRuns >= runCount) {
+            if(this.completeAction != null) {
+                this.completeAction.run();
+            }
             bukkitTask.cancel();
         }
     }
