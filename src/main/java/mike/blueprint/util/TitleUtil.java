@@ -15,7 +15,7 @@ public class TitleUtil {
         player.sendTitlePart(TitlePart.TIMES, Title.Times.times(Duration.of(fadeIn, ChronoUnit.SECONDS), Duration.of(stay, ChronoUnit.SECONDS), Duration.of(fadeOut, ChronoUnit.SECONDS)));
     }
 
-    public static void sendMultiMessageTitle(Player player) {
+    public static void sendMultiMessageTitle(Player player, int delayBetweenTitles) {
 
     }
 
