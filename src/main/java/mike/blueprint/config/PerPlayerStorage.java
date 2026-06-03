@@ -2,6 +2,7 @@ package mike.blueprint.config;
 
 import org.bukkit.plugin.Plugin;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -24,12 +25,13 @@ public abstract class PerPlayerStorage<V> {
 
     public CompletableFuture<V> preload(UUID uuid) {
         return CompletableFuture.supplyAsync(() -> {
-            final V data = (V) Json.get(plugin, folderName, uuid.toString(), value.getClass());
-            if (data != null) {
+            V data = (V) Json.get(plugin, folderName, uuid.toString(), value.get().getClass());
+            if(data == null) {
+                data = value.get();
                 storedPlayerData.put(uuid, data);
-            } else {
-                storedPlayerData.put(uuid, value.get());
-                Json.write(plugin, folderName, uuid.toString(), value, false);
+                Json.write(plugin, folderName, uuid.toString(), data, false);
+            }else{
+                storedPlayerData.put(uuid, data);
             }
             return data;
         });
@@ -39,11 +41,20 @@ public abstract class PerPlayerStorage<V> {
         return storedPlayerData.get(uuid);
     }
 
-    public void update(UUID uuid) {
+    public CompletableFuture<Void> update(UUID uuid) {
         final V storedData = storedPlayerData.get(uuid);
         if(storedData != null) {
-            CompletableFuture.runAsync(() -> Json.write(plugin, folderName, uuid.toString(), storedData, true));
+            return CompletableFuture.runAsync(() -> Json.write(plugin, folderName, uuid.toString(), storedData, true));
         }
+        return CompletableFuture.completedFuture(null);
+    }
+
+    public Collection<V> getAll() {
+        return storedPlayerData.values();
+    }
+
+    public void clear(UUID uuid) {
+        storedPlayerData.remove(uuid);
     }
 
 }

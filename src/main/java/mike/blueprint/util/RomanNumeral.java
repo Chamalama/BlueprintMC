@@ -20,7 +20,6 @@ public class RomanNumeral {
             "XC", 90
     ));
 
-    //EX "VII" get last I = 1
     public static int fromRoman(String roman) {
         int val = 0;
         int total = 0;

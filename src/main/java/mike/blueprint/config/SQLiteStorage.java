@@ -1,7 +1,9 @@
 package mike.blueprint.config;
 
 import lombok.Getter;
+import mike.blueprint.Blueprint;
 import mike.blueprint.util.ByteUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import java.io.ByteArrayInputStream;
@@ -10,6 +12,7 @@ import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
 public abstract class SQLiteStorage {
@@ -18,7 +21,7 @@ public abstract class SQLiteStorage {
     private final String dbName;
     private final Connection connection;
 
-    private final Map<String, Object> dataMap = new HashMap<>();
+    private final Map<String, Object> dataMap = new ConcurrentHashMap<>();
 
     public SQLiteStorage(Plugin plugin, String dbName) {
         this.plugin = plugin;
@@ -42,15 +45,15 @@ public abstract class SQLiteStorage {
     }
 
     public void createIDTable(String tableName) throws SQLException {
-        try(PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (id TEXT PRIMARY KEY AUTOINCREMENT, data BLOB NOT NULL)")) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement("CREATE TABLE IF NOT EXISTS " + tableName + " (id TEXT PRIMARY KEY, data BLOB NOT NULL)")) {
             preparedStatement.execute();
         }
     }
 
     public <V> void writeData(String table, String key, V data) {
-        try(PreparedStatement preparedStatement = connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, data)" + " VALUES (?, ?)")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, data)" + " VALUES (?, ?)")) {
             preparedStatement.setString(1, key);
-            preparedStatement.setBlob(2, new ByteArrayInputStream(ByteUtil.serialize(dataMap.getOrDefault(key, data))));
+            preparedStatement.setBytes(2, ByteUtil.serialize(dataMap.getOrDefault(key, data)));
             preparedStatement.executeUpdate();
             dataMap.put(key, data);
         } catch (SQLException | IOException e) {
@@ -58,10 +61,30 @@ public abstract class SQLiteStorage {
         }
     }
 
+    public <V> void writeUncachedData(String table, String key, V data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (id, data)" + " VALUES (?, ?)")) {
+            preparedStatement.setString(1, key);
+            preparedStatement.setBytes(2, ByteUtil.serialize(data));
+            preparedStatement.executeUpdate();
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <V> void writeUncachedDataNoReplace(String table, String key, V data) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO " + table + " (id, data)" + " VALUES (?, ?)")) {
+            preparedStatement.setString(1, key);
+            preparedStatement.setBytes(2, ByteUtil.serialize(data));
+            preparedStatement.executeUpdate();
+        } catch (SQLException | IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public <V> void writePlayerData(String table, UUID uuid, V data) {
-        try(PreparedStatement preparedStatement = connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (uuid, data)" + " VALUES (?, ?)")) {
+        try (PreparedStatement preparedStatement = connection.prepareStatement("INSERT OR REPLACE INTO " + table + " (uuid, data)" + " VALUES (?, ?)")) {
             preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setBlob(2, new ByteArrayInputStream(ByteUtil.serialize(data)));
+            preparedStatement.setBytes(2, ByteUtil.serialize(data));
             preparedStatement.executeUpdate();
         } catch (SQLException | IOException e) {
             throw new RuntimeException(e);
@@ -97,8 +120,29 @@ public abstract class SQLiteStorage {
         }
     }
 
+    public <V> V getUncachedData(String table, String column, String key) {
+        try(PreparedStatement preparedStatement = connection.prepareStatement(
+                "SELECT data FROM " + table + " WHERE " + column + " = ?"
+        )){
+            preparedStatement.setString(1, key);
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()) {
+                final byte[] data = resultSet.getBytes("data");
+                if(data == null) return null;
+                return ByteUtil.deserialize(data);
+            }
+        }catch (SQLException | IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return null;
+    }
+
     public <V> V getCachedData(String key) {
         return (V) dataMap.get(key);
+    }
+
+    private void runAsync(Runnable runnable) {
+        Bukkit.getScheduler().runTaskAsynchronously(Blueprint.getInst(), runnable);
     }
 
 }
