@@ -1,10 +1,10 @@
 package mike.blueprint.data;
 
+import lombok.NonNull;
 import mike.blueprint.util.ByteUtil;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 

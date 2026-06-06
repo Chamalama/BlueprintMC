@@ -1,13 +1,11 @@
 package mike.blueprint.util;
 
-import io.papermc.paper.datacomponent.DataComponentType;
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
 import mike.blueprint.event.GiveItemEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 
 import java.util.List;
@@ -17,8 +15,10 @@ public class ItemUtil {
 
     public static ItemStack build(Material material, String name, List<String> lore) {
         final ItemStack stack = new ItemStack(material);
-        stack.setData(DataComponentTypes.CUSTOM_NAME, Text.translate(name));
-        stack.setData(DataComponentTypes.LORE, ItemLore.lore(Text.translate(lore)));
+        final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Text.translate(name));
+        meta.lore(Text.translate(lore));
+        stack.setItemMeta(meta);
         return stack;
     }
 
@@ -29,28 +29,26 @@ public class ItemUtil {
     public static class ItemBuilder {
 
         private final ItemStack stack;
+        private ItemMeta meta;
 
         public ItemBuilder(Material material) {
             this.stack = new ItemStack(material);
+            this.meta = stack.getItemMeta();
         }
 
         public ItemBuilder setName(String name) {
-            this.stack.setData(DataComponentTypes.CUSTOM_NAME, Text.translate(name));
+            this.meta.displayName(Text.translate(name));
             return this;
         }
 
         public ItemBuilder setLore(List<String> lore) {
-            this.stack.setData(DataComponentTypes.LORE, ItemLore.lore(Text.translate(lore)));
+            this.meta.lore(Text.translate(lore));
             return this;
         }
 
         public ItemBuilder setData(Consumer<PersistentDataContainer> consumer) {
-            this.stack.editPersistentDataContainer(consumer);
-            return this;
-        }
-
-        public <T> ItemBuilder setItemData(DataComponentType.Valued<T> dataComponentTypes, T data) {
-            this.stack.setData(dataComponentTypes, data);
+            final PersistentDataContainer pdc = this.meta.getPersistentDataContainer();
+            consumer.accept(pdc);
             return this;
         }
 

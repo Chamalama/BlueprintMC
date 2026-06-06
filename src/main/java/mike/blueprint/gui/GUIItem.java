@@ -1,7 +1,5 @@
 package mike.blueprint.gui;
 
-import io.papermc.paper.datacomponent.DataComponentTypes;
-import io.papermc.paper.datacomponent.item.ItemLore;
 import lombok.Getter;
 import lombok.Setter;
 import mike.blueprint.Blueprint;
@@ -30,9 +28,9 @@ public class GUIItem implements Serializable {
 
     public ItemStack build() {
         final ItemStack stack = new ItemStack(itemType);
-        stack.setData(DataComponentTypes.CUSTOM_NAME, Text.translate(name));
-        stack.setData(DataComponentTypes.LORE, ItemLore.lore(Text.translate(lore)));
         final ItemMeta meta = stack.getItemMeta();
+        meta.displayName(Text.translate(name));
+        meta.lore(Text.translate(lore));
         final PersistentDataContainer pdc = meta.getPersistentDataContainer();
         pdc.set(ITEM_KEY, PersistentDataType.STRING, key);
         stack.setItemMeta(meta);

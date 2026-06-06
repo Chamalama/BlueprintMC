@@ -3,13 +3,10 @@ package mike.blueprint.command;
 import co.aikar.commands.BaseCommand;
 import co.aikar.commands.PaperCommandManager;
 import co.aikar.commands.annotation.*;
-import io.papermc.paper.registry.RegistryAccess;
-import io.papermc.paper.registry.RegistryKey;
 import mike.blueprint.loader.Component;
 import mike.blueprint.storage.WorldStorage;
 import mike.blueprint.util.Text;
 import mike.blueprint.util.WorldUtil;
-import net.kyori.adventure.key.Key;
 import org.bukkit.*;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -24,7 +21,7 @@ public class WorldCMD extends BaseCommand {
     private final WorldStorage worldStorage;
     private final PaperCommandManager paperCommandManager;
 
-    private final Registry<GameRule<?>> gameRuleRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.GAME_RULE);
+    //private final Registry<GameRule<?>> gameRuleRegistry = RegistryAccess.registryAccess().getRegistry(RegistryKey.GAME_RULE);
 
     public WorldCMD(WorldStorage worldStorage, PaperCommandManager paperCommandManager) {
         this.worldStorage = worldStorage;
@@ -45,10 +42,12 @@ public class WorldCMD extends BaseCommand {
     @CommandCompletion("name @env")
     public void onCreate(CommandSender sender, String worldName, String environment) {
         WorldUtil.createEmptyWorld(worldName, environment, world -> {
+            /*
             final GameRule<Boolean> rule = (GameRule<Boolean>) gameRuleRegistry.get(RegistryKey.GAME_RULE.typedKey(Key.key("minecraft:spawn_mobs")));
             if(rule != null) {
                 world.setGameRule(rule, false);
             }
+             */
             sender.sendMessage(world.getName() + " has generated successfully!");
             world.setSpawnLocation(0, 70, 0);
             worldStorage.getWorldNames().add(worldName);
@@ -60,11 +59,13 @@ public class WorldCMD extends BaseCommand {
     @CommandCompletion("@worlds name")
     public void onCopy(CommandSender sender, String worldName, String newWorldName) {
         WorldUtil.fastCopy(worldName, newWorldName, world -> {
+            /*
             sender.sendMessage(newWorldName + " has been generated!");
             final GameRule<Boolean> rule = (GameRule<Boolean>) gameRuleRegistry.get(RegistryKey.GAME_RULE.typedKey(Key.key("minecraft:spawn_mobs")));
             if(rule != null) {
                 world.setGameRule(rule, false);
             }
+             */
             worldStorage.getWorldNames().add(newWorldName);
             worldStorage.update();
         });

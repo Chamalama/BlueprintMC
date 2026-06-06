@@ -1,4 +1,4 @@
 name: Blueprint
 version: '1.0'
 main: mike.blueprint.Blueprint
-api-version: '1.21'
+api-version: '1.20'

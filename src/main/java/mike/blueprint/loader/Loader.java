@@ -41,9 +41,7 @@ public class Loader {
     public static Object resolve(Plugin plugin, Class<?> clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
         if(get(clazz) != null) return get(clazz);
         if(clazz == PaperCommandManager.class) {
-            final PaperCommandManager paperCommandManager = get(PaperCommandManager.class) != null ? get(PaperCommandManager.class) : new PaperCommandManager(plugin);
-            loaded.putIfAbsent(paperCommandManager.getClass(), paperCommandManager);
-            return paperCommandManager;
+            return getOrCreateManager(plugin);
         }
         if(resolving.contains(clazz)) {
             throw new RuntimeException("Class already resolved: " + clazz.getName());
@@ -83,9 +81,9 @@ public class Loader {
 
     private static void register(Plugin plugin, Object o) {
         if(o instanceof BaseCommand baseCommand) {
-            final PaperCommandManager paperCommandManager = get(PaperCommandManager.class) != null ? get(PaperCommandManager.class) : new PaperCommandManager(plugin);
-            loaded.putIfAbsent(paperCommandManager.getClass(), paperCommandManager);
+            final PaperCommandManager paperCommandManager = getOrCreateManager(plugin);
             paperCommandManager.registerCommand(baseCommand);
+            System.out.println("REGISTERED COMMAND: " + baseCommand.getName());
         }
         if(o instanceof Listener listener) {
             plugin.getServer().getPluginManager().registerEvents(listener, plugin);
@@ -97,6 +95,15 @@ public class Loader {
             sqLiteStorage.load();
         }
         loaded.put(o.getClass(), o);
+    }
+
+    private static PaperCommandManager getOrCreateManager(Plugin plugin) {
+        PaperCommandManager mgr = get(PaperCommandManager.class);
+        if (mgr == null) {
+            mgr = new PaperCommandManager(plugin);
+            loaded.put(PaperCommandManager.class, mgr);
+        }
+        return mgr;
     }
 
     public static <V> V get(Class<V> clazz) {

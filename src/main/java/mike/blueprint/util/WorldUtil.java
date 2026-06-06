@@ -2,19 +2,16 @@ package mike.blueprint.util;
 
 import mike.blueprint.Blueprint;
 import mike.blueprint.world.EmptyWorld;
-import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
+import org.bukkit.util.FileUtil;
 
-import javax.security.auth.callback.Callback;
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.locks.StampedLock;
 import java.util.function.Consumer;
 
 public class WorldUtil {
@@ -68,17 +65,13 @@ public class WorldUtil {
                     if(file.listFiles()[1].getName().equalsIgnoreCase("paper")) continue;
                 }
                 if(file.isDirectory()) {
-                    try {
-                        FileUtils.copyDirectoryToDirectory(file, copyWorld);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
+                    //FileUtil.copyDirectoryToDirectory(file, copyWorld);
                     continue;
                 }
                 final String name = file.getName();
                 if(name.equalsIgnoreCase("paper-world.yml")) continue;
                 try {
-                    FileUtils.copyFileToDirectory(file, copyWorld, false);
+                    //FileUtils.copyFileToDirectory(file, copyWorld, false);
                 }catch (Exception e) {
                     throw new RuntimeException(e);
                 }

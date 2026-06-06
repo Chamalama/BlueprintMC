@@ -42,10 +42,11 @@ public abstract class AbstractGUI implements InventoryHolder {
     }
 
     public AbstractGUI populateFiller(Material filler) {
+        final ItemStack fillerItem = new ItemStack(filler);
         for(int i = 0; i < inventory.getSize(); i++) {
             final ItemStack stack = inventory.getItem(i);
             if(stack != null) continue;
-            inventory.setItem(i, ItemStack.of(filler));
+            inventory.setItem(i, fillerItem);
         }
         return this;
     }
