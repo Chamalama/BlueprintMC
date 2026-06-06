@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Getter
-@Component
 public class WorldStorage extends Config {
 
     private final List<String> worldNames = new ArrayList<>();

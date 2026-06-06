@@ -9,9 +9,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Getter
@@ -135,6 +133,26 @@ public abstract class SQLiteStorage {
             throw new RuntimeException(e);
         }
         return null;
+    }
+
+    public <V> Collection<V> getAllColumnData(String table, Class<V> type) {
+        final Collection<V> data = new ArrayList<>();
+        try(PreparedStatement preparedStatement = connection.prepareStatement(
+                "SELECT data FROM " + table
+        )){
+            final ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                final byte[] columnData = resultSet.getBytes("data");
+                if(columnData == null) return null;
+                final V object = ByteUtil.deserialize(columnData);
+                if(type.isInstance(object)) {
+                    data.add(object);
+                }
+            }
+        } catch (SQLException | IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        return data;
     }
 
     public <V> V getCachedData(String key) {

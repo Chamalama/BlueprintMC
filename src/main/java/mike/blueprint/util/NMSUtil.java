@@ -1,18 +1,8 @@
 package mike.blueprint.util;
 
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
-import org.bukkit.World;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-
 public class NMSUtil {
 
+    /*
     public static ServerPlayer getServerPlayer(Player player) {
         return ((CraftPlayer)player).getHandle();
     }
@@ -43,4 +33,6 @@ public class NMSUtil {
         getImpl(player).send(packet);
     }
 
+
+     */
 }

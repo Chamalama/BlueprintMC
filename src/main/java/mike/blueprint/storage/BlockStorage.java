@@ -4,7 +4,6 @@ import mike.blueprint.Blueprint;
 import mike.blueprint.config.SQLiteStorage;
 import mike.blueprint.loader.Component;
 
-@Component
 public class BlockStorage extends SQLiteStorage {
 
     public static final String TABLE = "blocks";

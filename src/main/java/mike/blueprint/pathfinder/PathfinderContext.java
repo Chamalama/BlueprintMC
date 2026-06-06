@@ -36,7 +36,7 @@ public class PathfinderContext {
 
         int tries = 0;
 
-        while (!openNodes.isEmpty() && ++tries < 1550) {
+        while (!openNodes.isEmpty() && ++tries < 150) {
 
             Node current = openNodes.poll();
 
@@ -63,8 +63,11 @@ public class PathfinderContext {
                 openNodes.remove(node);
                 openNodes.add(node);
             }
+
         }
+
         return pathfinderState;
+
     }
 
     public boolean canWalkOnNode(Node node, ChunkSnapshot chunkSnapshot) {
