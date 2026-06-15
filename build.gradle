@@ -37,7 +37,7 @@ publishing {
 
             groupId = "com.github.Chamalama"
             artifactId = "Blueprint"
-            version = "v1.2.3"
+            version = "v1.2.4"
         }
     }
 }
