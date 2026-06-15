@@ -2,6 +2,7 @@ package mike.blueprint;
 
 import lombok.Getter;
 import mike.blueprint.loader.Loader;
+import mike.blueprint.util.AbstractTask;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Blueprint extends JavaPlugin {
@@ -17,6 +18,10 @@ public final class Blueprint extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        // Plugin shutdown logic
+        Loader.getLoaded().values().forEach(o -> {
+            if (o instanceof AbstractTask task) {
+                task.cancel();
+            }
+        });
     }
 }
