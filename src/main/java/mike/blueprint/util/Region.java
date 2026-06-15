@@ -13,9 +13,11 @@ import java.util.Set;
 @Setter
 public class Region {
 
+    private final String worldName;
     private final int minX, minY, minZ, maxX, maxY, maxZ;
 
-    public Region(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+    public Region(String worldName, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        this.worldName = worldName;
         this.minX = minX;
         this.minY = minY;
         this.minZ = minZ;
@@ -26,6 +28,7 @@ public class Region {
 
     public Region(Location one, Location two) {
         this(
+                one.getWorld().getName(),
                 min(one.getBlockX(), two.getBlockX()),
                 min(one.getBlockY(), two.getBlockY()),
                 min(one.getBlockZ(), two.getBlockZ()),
@@ -46,6 +49,16 @@ public class Region {
             }
         }
         return blocks;
+    }
+
+    public boolean contains(Location location) {
+        final String locationWorldName = location.getWorld().getName();
+        if (!locationWorldName.equalsIgnoreCase(worldName)) return false;
+        final double locX = location.getX();
+        final double locY = location.getY();
+        final double locZ = location.getZ();
+
+        return locX >= minX && locX <= maxX && locY >= minY && locY <= maxY && locZ >= minZ && locZ <= maxZ;
     }
 
     public static int min(int one, int two) {
