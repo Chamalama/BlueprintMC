@@ -1,5 +1,6 @@
 package mike.blueprint.gui;
 
+import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
 import mike.blueprint.config.Config;
@@ -13,7 +14,9 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 @Getter
@@ -23,6 +26,8 @@ public abstract class BaseGUI extends Config implements InventoryHolder, Listene
     private transient final Plugin plugin;
     protected transient Inventory inventory;
     protected transient boolean paged;
+
+    protected final transient Map<Integer, GUIItem> items = Maps.newHashMap();
 
     public BaseGUI(Plugin plugin, String title) {
         super(plugin, "gui", title);
@@ -42,6 +47,11 @@ public abstract class BaseGUI extends Config implements InventoryHolder, Listene
         populate(gui, 0);
     }
 
+    public void create(int size, String title) {
+        this.inventory = Bukkit.createInventory(this, size, title);
+        populate();
+    }
+
     public void populate(GUI gui, int page) {
         if(!paged) {
             page = 0;
@@ -55,14 +65,35 @@ public abstract class BaseGUI extends Config implements InventoryHolder, Listene
         }
     }
 
+    public void populate() {
+        for (Field field : this.getClass().getDeclaredFields()) {
+            field.setAccessible(true);
+            try {
+                if (field.get(this) instanceof GUIItem item) {
+                    this.items.put(item.getSlot(), item);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        for (Map.Entry<Integer, GUIItem> entries : items.entrySet()) {
+            this.inventory.setItem(entries.getKey(), entries.getValue().build());
+        }
+    }
+
     public ItemStack[] getPageContents(int page, int slots, ItemStack[] items) {
-        if(page <= 0) {
-            return new ItemStack[slots];
+        if (page <= 0) {
+            final ItemStack[] contents = new ItemStack[slots];
+            for (int i = 0; i < slots && i < items.length; ++i) {
+                if (items[i] == null) break;
+                contents[i] = items[i];
+            }
+            return contents;
         }else{
             int itemStartIndex = slots * page;
             int endIndex = Math.min(itemStartIndex + slots, items.length);
             final ItemStack[] contents = new ItemStack[slots];
-            for(int i = 0; i < slots && (itemStartIndex + i) < endIndex; i++) {
+            for (int i = 0; i < slots && (itemStartIndex + i) < endIndex; i++) {
                 contents[i] = items[itemStartIndex + i];
             }
             return contents;

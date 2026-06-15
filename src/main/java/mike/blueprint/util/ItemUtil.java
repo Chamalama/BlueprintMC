@@ -3,12 +3,17 @@ package mike.blueprint.util;
 import io.papermc.paper.datacomponent.DataComponentType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.ItemLore;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import mike.blueprint.event.GiveItemEvent;
+import net.kyori.adventure.key.Key;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -22,8 +27,38 @@ public class ItemUtil {
         return stack;
     }
 
+    public static ItemStack setTooltipStyle(ItemStack stack, Key style) {
+        stack.setData(DataComponentTypes.TOOLTIP_STYLE, style);
+        return stack;
+    }
+
+    public static ItemStack setTooltip(ItemStack stack, DataComponentType... hidden) {
+        stack.setData(DataComponentTypes.TOOLTIP_DISPLAY, TooltipDisplay.tooltipDisplay().addHiddenComponents(hidden).build());
+        return stack;
+    }
+
     public static void giveItem(Player player, ItemStack stack) {
         Bukkit.getPluginManager().callEvent(new GiveItemEvent(player, stack));
+    }
+
+    public static boolean hasKey(ItemStack stack, NamespacedKey key) {
+        if (!stack.hasItemMeta()) return false;
+        final ItemMeta meta = stack.getItemMeta();
+        final PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        return pdc.has(key);
+    }
+
+    public static <E> E getData(ItemStack stack, NamespacedKey key, PersistentDataType<byte[], E> dataType) {
+        final ItemMeta meta = stack.getItemMeta();
+        final PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        return pdc.get(key, dataType);
+    }
+
+    public static <E> void setData(ItemStack stack, NamespacedKey key, PersistentDataType<byte[], E> dataType, E data) {
+        final ItemMeta meta = stack.getItemMeta();
+        final PersistentDataContainer pdc = meta.getPersistentDataContainer();
+        pdc.set(key, dataType, data);
+        stack.setItemMeta(meta);
     }
 
     public static class ItemBuilder {

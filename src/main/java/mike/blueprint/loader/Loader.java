@@ -24,6 +24,7 @@ public class Loader {
     private static final Set<Class<?>> resolving = new HashSet<>();
 
     public static ObjectList<Class<?>> getComponentClasses(Plugin plugin) throws IOException {
+        if(plugin == null) return new ObjectArrayList<>();
         final ObjectList<Class<?>> componentClasses = new ObjectArrayList<>();
         final ClassLoader classLoader = plugin.getClass().getClassLoader();
         final ClassPath classPath = ClassPath.from(classLoader);
@@ -39,17 +40,21 @@ public class Loader {
     }
 
     public static Object resolve(Plugin plugin, Class<?> clazz) throws InvocationTargetException, InstantiationException, IllegalAccessException {
+        if(plugin == null) return null;
         if(get(clazz) != null) return get(clazz);
         if(clazz == PaperCommandManager.class) {
             final PaperCommandManager paperCommandManager = get(PaperCommandManager.class) != null ? get(PaperCommandManager.class) : new PaperCommandManager(plugin);
             loaded.putIfAbsent(paperCommandManager.getClass(), paperCommandManager);
             return paperCommandManager;
         }
+        if(!clazz.isAnnotationPresent(Component.class)) return null;
         if(resolving.contains(clazz)) {
             throw new RuntimeException("Class already resolved: " + clazz.getName());
         }
         resolving.add(clazz);
-        final Constructor<?> constructor = clazz.getConstructors().length > 0 ? clazz.getConstructors()[0] : clazz.getDeclaredConstructors()[0];
+        int constructors = clazz.getDeclaredConstructors().length;
+        if (constructors == 0) return null;
+        final Constructor<?> constructor = clazz.getDeclaredConstructors()[0];
         final Parameter[] parameters = constructor.getParameters();
         if(parameters.length == 0) {
             final Object instance = constructor.newInstance();

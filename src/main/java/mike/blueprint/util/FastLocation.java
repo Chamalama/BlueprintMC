@@ -12,11 +12,11 @@ import java.util.function.Consumer;
 public class FastLocation implements Cloneable {
 
     private String worldName;
-    private int x, y, z;
+    private double x, y, z;
     private float yaw, pitch;
     private long id;
 
-    public FastLocation(String worldName, int x, int y, int z) {
+    public FastLocation(String worldName, double x, double y, double z) {
         this.worldName = worldName;
         this.x = x;
         this.y = y;
@@ -26,7 +26,7 @@ public class FastLocation implements Cloneable {
         this.id = ((long)x & 0x3FFFFFFL) | (((long)z & 0x3FFFFFFL) << 26) | (((long)y & 0xFFFL) << 52);
     }
 
-    public FastLocation(String worldName, int x, int y, int z, float yaw, float pitch) {
+    public FastLocation(String worldName, double x, double y, double z, float yaw, float pitch) {
         this.worldName = worldName;
         this.x = x;
         this.y = y;
@@ -51,6 +51,14 @@ public class FastLocation implements Cloneable {
 
     public Location toBukkit() {
         return new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+    }
+
+    public double distanceFrom(Location location) {
+        final double dx = location.getX() - x;
+        final double dy = location.getY() - y;
+        final double dz = location.getZ() - z;
+
+        return dx * dx + dy * dy + dz * dz;
     }
 
     @Override

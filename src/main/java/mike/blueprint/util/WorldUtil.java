@@ -8,13 +8,10 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.WorldCreator;
 
-import javax.security.auth.callback.Callback;
 import java.io.*;
 import java.nio.file.*;
-import java.nio.file.attribute.FileAttribute;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.locks.StampedLock;
 import java.util.function.Consumer;
 
 public class WorldUtil {
@@ -51,23 +48,44 @@ public class WorldUtil {
 
     public static void fastCopy(String initialWorld, String newWorld, Consumer<World> callback) {
         final File worldDir = Bukkit.getWorldContainer();
-        final File dimensionDir = new File(worldDir, "world/dimensions/minecraft");
+
+        final String serverVersion = Bukkit.getBukkitVersion();
+        final String version = serverVersion.split("-")[0].split("\\.")[0];
+        final int versionNumber = Integer.parseInt(version);
+        final boolean is26 = versionNumber >= 26;
+
+        File dimensionDir = is26 ? new File(worldDir, "world/dimensions/minecraft") : worldDir;
+
         Bukkit.getScheduler().runTaskAsynchronously(Blueprint.getInst(), () -> {
+
             final File[] files = dimensionDir.listFiles();
             if(files == null) return;
+
             final File copyFile = (File) Arrays.stream(files).filter(file -> file.getName().equalsIgnoreCase(initialWorld)).toArray()[0];
             if(copyFile == null || !copyFile.isDirectory()) return;
+
             final File copyWorld = new File(dimensionDir, newWorld);
-            final File paperDir = new File(copyWorld, "data/paper");
+
+            if(is26) {
+                final File paperDir = new File(copyWorld, "data/paper");
+                paperDir.mkdirs();
+            }
+
             copyWorld.mkdirs();
-            paperDir.mkdirs();
+
             final File[] worldFiles = copyFile.listFiles();
-            if(worldFiles == null) return;
-            for(File file : worldFiles) {
-                if(file.getName().equalsIgnoreCase("data")) {
-                    if(file.listFiles()[1].getName().equalsIgnoreCase("paper")) continue;
+
+            if (worldFiles == null) return;
+
+            for (File file : worldFiles) {
+
+                if (is26) {
+                    if (file.getName().equalsIgnoreCase("data")) {
+                        if (file.listFiles()[1].getName().equalsIgnoreCase("paper")) continue;
+                    }
                 }
-                if(file.isDirectory()) {
+
+                if (file.isDirectory()) {
                     try {
                         FileUtils.copyDirectoryToDirectory(file, copyWorld);
                     } catch (IOException e) {
@@ -75,20 +93,27 @@ public class WorldUtil {
                     }
                     continue;
                 }
+
                 final String name = file.getName();
-                if(name.equalsIgnoreCase("paper-world.yml")) continue;
+
+                if (!is26 && (name.equalsIgnoreCase("session.lock") || name.equalsIgnoreCase("uid.dat"))) continue;
+                if (name.equalsIgnoreCase("paper-world.yml")) continue;
+
                 try {
                     FileUtils.copyFileToDirectory(file, copyWorld, false);
                 }catch (Exception e) {
                     throw new RuntimeException(e);
                 }
             }
+
             Bukkit.getScheduler().runTask(Blueprint.getInst(), () -> {
                 final WorldCreator worldCreator = new WorldCreator(newWorld);
                 worldCreator.generator(new EmptyWorld());
                 callback.accept(Bukkit.createWorld(worldCreator));
             });
+
         });
+
     }
 
     private static void makeDirs(File sourceFile, File copyDir) {

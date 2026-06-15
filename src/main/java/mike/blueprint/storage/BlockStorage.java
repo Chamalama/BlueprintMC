@@ -9,7 +9,7 @@ public class BlockStorage extends SQLiteStorage {
     public static final String TABLE = "blocks";
 
     public BlockStorage() {
-        super(Blueprint.getInst(), "block-data");
+        super(Blueprint.getInst(), "block-storage", "block-data");
     }
 
     @Override

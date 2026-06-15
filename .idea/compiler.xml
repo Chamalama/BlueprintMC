@@ -10,6 +10,6 @@
         <module name="Blueprint.main" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="21" />
+    <bytecodeTargetLevel target="25" />
   </component>
 </project>
